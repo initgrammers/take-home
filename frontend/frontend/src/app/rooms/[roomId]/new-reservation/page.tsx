@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 import Link from "next/link";
 
 
-export default function NewReservationPage({ params }: { params: { roomId: string } }) {
+export default function NewReservationPage({ params }: { params: Promise<{ roomId: string }> }) {
+  const { roomId } = use(params);
   const [start, setStart] = useState<string>("");
   const [end, setEnd] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +69,7 @@ export default function NewReservationPage({ params }: { params: { roomId: strin
     try {
       const payload = {
         id: generateId(),
-        room_id: params.roomId,
+        room_id: roomId,
         guest_email: "guest@example.com",
         start_date: start,
         end_date: end,
@@ -103,7 +104,7 @@ export default function NewReservationPage({ params }: { params: { roomId: strin
         await refreshExisting();
       } catch {}
     })();
-  }, [params.roomId]);
+  }, [roomId]);
 
   function toISODate(d: Date | undefined) {
     if (!d) return "";
@@ -113,7 +114,7 @@ export default function NewReservationPage({ params }: { params: { roomId: strin
   // Refresca las reservas ACTIVAS del backend para este roomId
   async function refreshExisting() {
     try {
-      const res = await fetch(`/api/rooms/${params.roomId}/reservations`, { cache: "no-store" });
+      const res = await fetch(`/api/rooms/${roomId}/reservations`, { cache: "no-store" });
       const data = await res.json();
       setExisting(
         (data || [])
@@ -125,18 +126,11 @@ export default function NewReservationPage({ params }: { params: { roomId: strin
     }
   }
 
-  // Calendar removed: using manual date inputs instead
-  // (react-day-picker imports removed)
-  // const disabledRanges = useMemo(() => {
-  //   const ranges = reservedRanges.map(({ start, end }) => ({ from: start, to: end }));
-  //   return [{ before: today }, ...ranges];
-  // }, [reservedRanges, today]);
-
   return (
     <main className="p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">New reservation</h1>
-        <Link href={`/rooms/${params.roomId}`} className="text-sm text-blue-600">Back</Link>
+        <Link href={`/rooms/${roomId}`} className="text-sm text-blue-600">Back</Link>
       </div>
 
       <section className="mb-6">
@@ -208,7 +202,6 @@ export default function NewReservationPage({ params }: { params: { roomId: strin
             <>Introduce fechas válidas que no se solapen con reservas activas.</>
           )}
         </div>
-        {/* Info text ends here; no extra closing label */}
 
         <button
           onClick={handleCreate}

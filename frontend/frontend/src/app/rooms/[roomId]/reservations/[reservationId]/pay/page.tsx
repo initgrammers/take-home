@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, use } from "react";
 
 type Reservation = {
   id: string;
@@ -18,8 +18,8 @@ type Room = {
   price_per_night: number;
 };
 
-export default function PayReservationPage({ params }: { params: { roomId: string; reservationId: string } }) {
-  const { roomId, reservationId } = params;
+export default function PayReservationPage({ params }: { params: Promise<{ roomId: string; reservationId: string }> }) {
+  const { roomId, reservationId } = use(params);
   const [room, setRoom] = useState<Room | null>(null);
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [loading, setLoading] = useState(true);
