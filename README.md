@@ -1,6 +1,16 @@
-# Backend: How to run and test
+# Backend
 
-This README explains how to start the backend with Docker, apply migrations, and test the endpoints.
+## Architecture (Hexagonal)
+This backend follows a Hexagonal Architecture (Ports & Adapters), consistent with InitGrammers projects.
+
+- Domain (core business): pure entities and repository interfaces under `backend/src/*/domain` (e.g., Room, Reservation, Payment; RoomRepository, ReservationRepository, PaymentRepository).
+- Application (use cases): orchestration of domain rules under `backend/src/*/application` (e.g., ListRoomsUseCase, CreateReservationUseCase, CancelReservationUseCase, ListPaymentsUseCase).
+- Infrastructure (adapters): persistence and framework integrations under `backend/src/*/infra` and `backend/api/routes`.
+  - Persistence: SQLAlchemy models (RoomModel, ReservationModel, PaymentModel) and PSQL repositories (RoomRepositoryPsql, ReservationRepositoryPsql, PaymentRepositoryPsql).
+  - Transport/UI: FastAPI routes in `backend/api/routes` act as driving adapters.
+  - DB ops: Alembic migrations and initial data seeding in `backend/src/shared/infra/seed.py`.
+- Dependency rule: outer layers depend on inner layers; domain/application do not depend on infrastructure. Infra implements the ports (interfaces) defined in domain.
+- Benefits: testability, separation of concerns, and replaceable adapters (e.g., swap database or add transports without changing core).
 
 ## Requirements
 - Docker and Docker Compose
