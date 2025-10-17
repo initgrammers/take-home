@@ -31,3 +31,8 @@ class PaymentOut(BaseModel):
     id: str
     reservation_id: str
     amount: float
+
+class PaymentIn(BaseModel):
+    id: str
+    reservation_id: str
+    amount: float

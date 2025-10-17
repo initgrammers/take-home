@@ -68,10 +68,27 @@ def cancel_reservation(reservation_id: str, session: Session = Depends(get_sessi
     )
 
 @router.get("/rooms/{room_id}/reservations", response_model=list[ReservationOut])
+@router.get("/reservations", response_model=list[ReservationOut])
+def list_reservations(session: Session = Depends(get_session)):
+    reservation_repo = ReservationRepositoryPsql(session)
+    rows = reservation_repo.get_all()
+    return [
+        ReservationOut(
+            id=r.id,
+            room_id=r.room_id,
+            guest_email=r.guest_email,
+            start_date=r.start_date,
+            end_date=r.end_date,
+            status=r.status,
+        )
+        for r in rows
+    ]
+
+@router.get("/rooms/{room_id}/reservations", response_model=list[ReservationOut])
 def list_reservations_by_room(room_id: str, session: Session = Depends(get_session)):
     reservation_repo = ReservationRepositoryPsql(session)
     rows = reservation_repo.get_all()
-    filtered = [r for r in rows if r.room_id == room_id]
+    filtered = [r for r in rows if r.room_id == room_id and r.status == "active"]
     return [
         ReservationOut(
             id=r.id,

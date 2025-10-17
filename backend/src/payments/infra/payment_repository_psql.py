@@ -39,6 +39,7 @@ class PaymentRepositoryPsql(PaymentRepository):
         )
         self.session.add(row)
         self.session.flush()
+        self.session.commit()
         return Payment(
             id=row.id,
             reservation_id=row.reservation_id,
