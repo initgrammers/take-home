@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: hotel_db
+    environment:
+      POSTGRES_USER: hotel
+      POSTGRES_PASSWORD: hotelpass
+      POSTGRES_DB: hotel
+    ports:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotel -d hotel"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hotel_api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://hotel:hotelpass@db:5432/hotel
+      UVICORN_HOST: 0.0.0.0
+      UVICORN_PORT: 8000
+    ports:
+      - "8000:8000"
+    command: ["/bin/sh", "-c", "alembic upgrade head && gunicorn -k uvicorn.workers.UvicornWorker -w 2 -b 0.0.0.0:8000 main:app"]
+    working_dir: /app
+
+volumes:
+  db_data:
