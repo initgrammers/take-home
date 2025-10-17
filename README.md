@@ -99,3 +99,5 @@ Examples (curl):
 ## Recommendations
 - Testing: It is recommended to add automated tests for both backend (domain, application, and integration tests) and frontend (component and end-to-end tests).
 - Endpoint documentation: Consider enriching FastAPI endpoint documentation with more detailed responses, examples, tags, and descriptions per endpoint to improve API clarity. Some capabilities provided by FastAPI (e.g., per-endpoint detail) were kept minimal here and can be expanded.
+- Availability in calendar: Show a calendar in the reservation flow highlighting AVAILABLE dates and blocking currently reserved dates to avoid invalid selections. Integrate existing reservation periods from the backend and disable occupied ranges.
+- UI/UX improvements: Enhance the interface to be more practical and clear (layout, loading/error states, visible validations, feedback messages, responsive design) and apply modern styling to improve the user experience.
