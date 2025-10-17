@@ -65,9 +65,28 @@ class ReservationRepositoryPsql(ReservationRepository):
         self.session.add(row)
         try:
             self.session.flush()
+            self.session.commit()
         except IntegrityError:
             self.session.rollback()
             raise ValueError("Reservation with this id already exists")
+        return Reservation(
+            id=row.id,
+            room_id=row.room_id,
+            guest_email=row.guest_email,
+            start_date=row.start_date,
+            end_date=row.end_date,
+            status=row.status,
+        )
+
+    def cancel(self, reservation_id: str) -> Reservation:
+        row = self.session.get(ReservationModel, reservation_id)
+        if not row:
+            raise ValueError("reservation not found")
+        if row.status != "active":
+            raise ValueError("reservation is not active")
+        row.status = "cancelled"
+        self.session.flush()
+        self.session.commit()
         return Reservation(
             id=row.id,
             room_id=row.room_id,

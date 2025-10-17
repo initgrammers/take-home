@@ -20,3 +20,8 @@ class ReservationRepository(ABC):
     def has_overlap(self, room_id: str, start_date: date, end_date: date) -> bool:
         """Return True if there is any ACTIVE reservation overlapping the given range for the room."""
         raise NotImplementedError
+
+    @abstractmethod
+    def cancel(self, reservation_id: str) -> Reservation:
+        """Cancel a reservation (only if status is 'active'), returning the updated domain object."""
+        raise NotImplementedError
