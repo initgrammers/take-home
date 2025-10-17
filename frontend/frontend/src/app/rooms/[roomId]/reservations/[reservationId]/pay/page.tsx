@@ -37,19 +37,18 @@ export default function PayReservationPage({
       try {
         setLoading(true);
         setError(null);
-        const [roomRes, reservationsRes] = await Promise.all([
+        const [roomRes, reservationRes] = await Promise.all([
           fetch(`/api/rooms/${roomId}`, { cache: "no-store" }),
-          fetch(`/api/rooms/${roomId}/reservations`, { cache: "no-store" }),
+          fetch(`/api/reservations/${reservationId}`, { cache: "no-store" }),
         ]);
         const roomData = await roomRes.json();
-        const reservationsData =
-          (await reservationsRes.json()) as Reservation[];
-        const found =
-          (reservationsData || []).find((r) => r.id === reservationId) || null;
+        const reservationData = reservationRes.ok
+          ? ((await reservationRes.json()) as Reservation)
+          : null;
         if (mounted) {
           setRoom(roomData ?? null);
-          setReservation(found);
-          if (!found) setError("Reservation not found for this room");
+          setReservation(reservationData);
+          if (!reservationData) setError("Reservation not found");
         }
       } catch (e) {
         if (mounted) setError("Failed to load reservation details");
