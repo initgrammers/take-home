@@ -1,5 +1,6 @@
 from typing import Sequence, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from ..domain.reservation import Reservation
 from ..domain.reservation_repository import ReservationRepository
@@ -46,6 +47,16 @@ class ReservationRepositoryPsql(ReservationRepository):
             status=reservation.status,
         )
         self.session.add(row)
-        self.session.flush()
-        self.session.commit()
-        return row
+        try:
+            self.session.flush()
+        except IntegrityError:
+            self.session.rollback()
+            raise ValueError("Reservation with this id already exists")
+        return Reservation(
+            id=row.id,
+            room_id=row.room_id,
+            guest_email=row.guest_email,
+            start_date=row.start_date,
+            end_date=row.end_date,
+            status=row.status,
+        )
