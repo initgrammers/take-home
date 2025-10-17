@@ -31,6 +31,16 @@ class PaymentRepositoryPsql(PaymentRepository):
             amount=Decimal(str(row.amount)),
         )
 
+    def get_by_reservation_id(self, reservation_id: str) -> Optional[Payment]:
+        row = self.session.query(PaymentModel).filter(PaymentModel.reservation_id == reservation_id).first()
+        if not row:
+            return None
+        return Payment(
+            id=row.id,
+            reservation_id=row.reservation_id,
+            amount=Decimal(str(row.amount)),
+        )
+
     def create(self, payment: Payment) -> Payment:
         row = PaymentModel(
             id=payment.id,

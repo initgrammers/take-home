@@ -14,3 +14,8 @@ class PaymentRepository(ABC):
     @abstractmethod
     def create(self, payment: Payment) -> Payment:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_by_reservation_id(self, reservation_id: str) -> Optional[Payment]:
+        """Return existing payment for a reservation if any, else None."""
+        raise NotImplementedError

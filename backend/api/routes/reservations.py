@@ -67,7 +67,6 @@ def cancel_reservation(reservation_id: str, session: Session = Depends(get_sessi
         status=updated.status,
     )
 
-@router.get("/rooms/{room_id}/reservations", response_model=list[ReservationOut])
 @router.get("/reservations", response_model=list[ReservationOut])
 def list_reservations(session: Session = Depends(get_session)):
     reservation_repo = ReservationRepositoryPsql(session)
