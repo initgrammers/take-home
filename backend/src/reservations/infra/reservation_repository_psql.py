@@ -1,6 +1,8 @@
 from typing import Sequence, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_, or_
+from datetime import date
 
 from ..domain.reservation import Reservation
 from ..domain.reservation_repository import ReservationRepository
@@ -36,6 +38,20 @@ class ReservationRepositoryPsql(ReservationRepository):
             end_date=row.end_date,
             status=row.status,
         )
+
+    def has_overlap(self, room_id: str, start_date: date, end_date: date) -> bool:
+        # Overlap condition: existing.start_date <= new.end_date AND existing.end_date >= new.start_date
+        exists = (
+            self.session.query(ReservationModel)
+            .filter(
+                ReservationModel.room_id == room_id,
+                ReservationModel.status == "active",
+                ReservationModel.start_date <= end_date,
+                ReservationModel.end_date >= start_date,
+            )
+            .first()
+        )
+        return exists is not None
 
     def create(self, reservation: Reservation) -> Reservation:
         row = ReservationModel(

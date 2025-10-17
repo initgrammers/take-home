@@ -21,5 +21,9 @@ class CreateReservationUseCase:
         if not self.room_service.exists(reservation.room_id):
             raise ValueError("room does not exist")
 
+        # Check overlapping reservations (active status)
+        if self.reservation_repo.has_overlap(reservation.room_id, reservation.start_date, reservation.end_date):
+            raise ValueError("Reservation dates overlap with an existing active reservation")
+
         created = self.reservation_repo.create(reservation)
         return created
