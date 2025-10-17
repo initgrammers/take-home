@@ -1,11 +1,16 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, ConfigDict
+from datetime import date
+
+class ReservationRangeOut(BaseModel):
+    start_date: date = Field(..., alias="from")
+    end_date: date = Field(..., alias="to")
+    model_config = ConfigDict(populate_by_name=True)
 
 class RoomOut(BaseModel):
     id: str
     name: str
     price_per_night: float
-
-from datetime import date
+    reservation_ranges: list[ReservationRangeOut]
 
 class ReservationIn(BaseModel):
     id: str
