@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-# from sqlalchemy.exc import IntegrityError  # removed to avoid infra leakage
 from src.shared.infra.db import get_session
-from api.schemas import ReservationIn, ReservationOut
-from src.reservations.application.create_reservation import CreateReservationUseCase
-from src.reservations.application.cancel_reservation import CancelReservationUseCase
-from src.reservations.infra.reservation_repository_psql import ReservationRepositoryPsql
-from src.reservations.domain.reservation import Reservation
+from api.schemas import ReservationOut, ReservationIn
 from src.rooms.infra.room_repository_psql import RoomRepositoryPsql
 from src.rooms.application.room_service import RoomService
+from src.reservations.application.create_reservation import CreateReservationUseCase
+from src.reservations.application.cancel_reservation import CancelReservationUseCase
+from src.reservations.application.get_reservation import GetReservationUseCase
+from src.reservations.infra.reservation_repository_psql import ReservationRepositoryPsql
+from src.reservations.domain.reservation import Reservation
 
 router = APIRouter()
 
@@ -65,6 +65,26 @@ def cancel_reservation(reservation_id: str, session: Session = Depends(get_sessi
         start_date=updated.start_date,
         end_date=updated.end_date,
         status=updated.status,
+    )
+
+@router.get("/reservations/{reservation_id}", response_model=ReservationOut)
+def get_reservation(reservation_id: str, session: Session = Depends(get_session)):
+    reservation_repo = ReservationRepositoryPsql(session)
+    use_case = GetReservationUseCase(reservation_repo)
+    try:
+        r = use_case.execute(reservation_id)
+    except ValueError as e:
+        msg = str(e)
+        if "reservation not found" in msg:
+            raise HTTPException(status_code=404, detail="Reservation not found")
+        raise HTTPException(status_code=422, detail=msg)
+    return ReservationOut(
+        id=r.id,
+        room_id=r.room_id,
+        guest_email=r.guest_email,
+        start_date=r.start_date,
+        end_date=r.end_date,
+        status=r.status,
     )
 
 @router.get("/reservations", response_model=list[ReservationOut])
