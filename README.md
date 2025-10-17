@@ -73,3 +73,29 @@ Examples (curl):
 3. Migrations with local Postgres (if you define `DATABASE_URL`):
    - `export DATABASE_URL='postgresql+psycopg2://user:pass@host:port/db'`
    - `cd backend && alembic revision --autogenerate -m "changes" && alembic upgrade head`
+
+## Frontend (Next.js)
+
+### Requirements
+- Node.js 18+ (recommended)
+- Bun
+
+### Run the frontend (development)
+1. Install dependencies:
+   - `cd frontend/frontend`
+   - `bun install`
+2. Start the dev server:
+   - `bun run dev`
+3. Open the app:
+   - http://localhost:3000/
+4. API proxy:
+   - The frontend proxies requests under `/api` to the backend at `http://localhost:8000` (configured via `next.config.ts`). Ensure the backend is running. If you access the app via a LAN IP (e.g., `http://192.168.x.x:3000`), server components construct absolute URLs using request headers, and client components use relative `/api` paths.
+
+### Build for production (optional)
+- `bun run build`
+- `bun run start`
+
+
+## Recommendations
+- Testing: It is recommended to add automated tests for both backend (domain, application, and integration tests) and frontend (component and end-to-end tests).
+- Endpoint documentation: Consider enriching FastAPI endpoint documentation with more detailed responses, examples, tags, and descriptions per endpoint to improve API clarity. Some capabilities provided by FastAPI (e.g., per-endpoint detail) were kept minimal here and can be expanded.
