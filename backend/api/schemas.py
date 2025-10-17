@@ -21,3 +21,8 @@ class ReservationOut(BaseModel):
     start_date: date
     end_date: date
     status: str
+
+class PaymentOut(BaseModel):
+    id: str
+    reservation_id: str
+    amount: float
