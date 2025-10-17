@@ -15,12 +15,15 @@ This backend follows a Hexagonal Architecture (Ports & Adapters), consistent wit
 ## Requirements
 - Docker and Docker Compose
 
-## Start the backend (Docker)
+## Start the stack (Docker)
 1. Build and start services:
    - `docker compose up -d --build`
-2. API available:
-   - http://localhost:8000/docs
-3. Database (PostgreSQL):
+2. Services and URLs:
+   - Backend API: http://localhost:8000/docs
+   - Frontend (Next.js): http://localhost:3000/
+3. Networking:
+   - The frontend uses `/api` rewrites pointing to the backend via the `BACKEND_URL` environment variable. In Docker, this is set to `http://api:8000` so the frontend can reach the backend within the Docker network.
+4. Database (PostgreSQL):
    - Published on host: `localhost:5433`
    - Internal (Docker network): the `api` service connects to `db:5432`.
 
@@ -89,7 +92,7 @@ Examples (curl):
 3. Open the app:
    - http://localhost:3000/
 4. API proxy:
-   - The frontend proxies requests under `/api` to the backend at `http://localhost:8000` (configured via `next.config.ts`). Ensure the backend is running. If you access the app via a LAN IP (e.g., `http://192.168.x.x:3000`), server components construct absolute URLs using request headers, and client components use relative `/api` paths.
+   - The frontend proxies requests under `/api` to the backend using `BACKEND_URL` (configured via `next.config.ts`). In Docker it uses `http://api:8000`; locally it falls back to `http://localhost:8000`.
 
 ### Build for production (optional)
 - `bun run build`
@@ -101,3 +104,4 @@ Examples (curl):
 - Endpoint documentation: Consider enriching FastAPI endpoint documentation with more detailed responses, examples, tags, and descriptions per endpoint to improve API clarity. Some capabilities provided by FastAPI (e.g., per-endpoint detail) were kept minimal here and can be expanded.
 - Availability in calendar: Show a calendar in the reservation flow highlighting AVAILABLE dates and blocking currently reserved dates to avoid invalid selections. Integrate existing reservation periods from the backend and disable occupied ranges.
 - UI/UX improvements: Enhance the interface to be more practical and clear (layout, loading/error states, visible validations, feedback messages, responsive design) and apply modern styling to improve the user experience.
+- Payment provider integration: Integrate a secure payment provider (e.g., Stripe) or other methods to handle card payments, webhooks for payment status updates, and robust error handling. Consider server-side payment intents, client-side SDK integration, and idempotency keys to avoid duplicate charges.
