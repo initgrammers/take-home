@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from src.shared.infra.db import SessionLocal, engine, Base, is_sqlite
 from src.shared.infra.seed import seed_initial_rooms
 from api.routes.rooms import router as rooms_router
+from api.routes.reservations import router as reservations_router
 
 app = FastAPI()
 
@@ -24,3 +25,4 @@ def on_startup():
         seed_initial_rooms(session)
 
 app.include_router(rooms_router)
+app.include_router(reservations_router)
