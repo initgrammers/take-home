@@ -11,6 +11,7 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [guestEmail, setGuestEmail] = useState<string>("");
 
   // Existing ACTIVE reservations to help pick dates and block in calendar
   const [existing, setExisting] = useState<Array<{ start_date: string; end_date: string }>>([]);
@@ -26,12 +27,13 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
 
   const canSubmit = useMemo(() => {
     const hasDates = Boolean(start && end);
-    if (!hasDates) return false;
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail);
+    if (!hasDates || !emailValid) return false;
     const s = new Date(start);
     const e = new Date(end);
     if (Number.isNaN(s.getTime()) || Number.isNaN(e.getTime())) return false;
     return !doesRangeOverlap(stripTime(s), stripTime(e));
-  }, [start, end, reservedRanges]);
+  }, [start, end, reservedRanges, guestEmail]);
 
   // Generador de UUID seguro en frontend (fallback si no existe crypto.randomUUID)
   function generateId(): string {
@@ -70,7 +72,7 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
       const payload = {
         id: generateId(),
         room_id: roomId,
-        guest_email: "guest@example.com",
+        guest_email: guestEmail,
         start_date: start,
         end_date: end,
       };
@@ -90,6 +92,7 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
       await refreshExisting();
       setStart("");
       setEnd("");
+      setGuestEmail("");
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -150,6 +153,17 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
 
       <div className="grid gap-4 max-w-md">
         <label className="flex flex-col gap-1">
+          <span className="text-sm">Guest email</span>
+          <input
+            type="email"
+            value={guestEmail}
+            onChange={(e) => setGuestEmail(e.target.value)}
+            placeholder="guest@example.com"
+            className="border rounded px-2 py-1 text-sm"
+          />
+        </label>
+
+        <label className="flex flex-col gap-1">
           <span className="text-sm">Start date</span>
           <input
             type="date"
@@ -199,7 +213,7 @@ export default function NewReservationPage({ params }: { params: Promise<{ roomI
           {start && end ? (
             <>Selected: {new Date(start).toLocaleDateString()} — {new Date(end).toLocaleDateString()}</>
           ) : (
-            <>Introduce fechas válidas que no se solapen con reservas activas.</>
+            <>Introduce fechas válidas que no se solapen con reservas activas y un correo válido.</>
           )}
         </div>
 
