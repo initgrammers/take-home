@@ -27,7 +27,7 @@ RUN bun run build || npm run build
 FROM node:18-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-
+ENV NODE_OPTIONS=--dns-result-order=ipv4first
 # Add non-root user
 RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
 
